@@ -7,3 +7,6 @@ python-json-logger>=2.0.0
 
 # Ruff Linting
 ruff>=0.4.0
+
+# Pytest
+pytest>=9.0.0
