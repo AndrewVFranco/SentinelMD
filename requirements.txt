@@ -1,0 +1,9 @@
+# Pydantic
+pydantic-settings>=2.0.0
+python-dotenv>=1.0.0
+
+# Logging
+python-json-logger>=2.0.0
+
+# Ruff Linting
+ruff>=0.4.0

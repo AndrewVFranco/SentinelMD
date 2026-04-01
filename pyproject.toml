@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "clinical-llm-hallucination-detector"
+version = "0.1.0"
+dependencies = []
+authors = [
+    {name = "Andrew Franco", email = "And.Fra.97@gmail.com"}
+]
+maintainers = [
+  {name = "Andrew Franco", email = "And.Fra.97@gmail.com"}
+]
+description = "RAG pipeline ingesting txt and HL7 FHIR data, validates llm output against medical literature"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
