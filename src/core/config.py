@@ -8,12 +8,8 @@ class Settings(BaseSettings):
     # Hugging Face
     HF_TOKEN: str
 
-    # Ollama
-    OLLAMA_SERVER_IP: str
-    OLLAMA_SERVER_PORT: int = 11434
-    OLLAMA_MODEL: str = "llama3.2"
-    OLLAMA_MAX_TOKENS: int = 1024
-    OLLAMA_TEMPERATURE: float = 0.1
+    # Gemini
+    GEMINI_API_KEY: str
 
     # Pinecone
     PINECONE_API_KEY: str
