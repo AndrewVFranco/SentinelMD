@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     PINECONE_API_KEY: str
     PINECONE_INDEX_NAME: str
 
+    # Redis
+    REDIS_HOST: str
+    REDIS_PORT: str
+
     # MLflow
     MLFLOW_TRACKING_URI: str = "http://localhost:5000"
     MLFLOW_ARTIFACT_LOCATION: str = "logs/mlflow"
