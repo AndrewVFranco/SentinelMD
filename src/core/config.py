@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     OLLAMA_TEMPERATURE: float = 0.1
 
     # Pinecone
-    PINECONE_API_KEY = str
-    PINECONE_INDEX_NAME = str
+    PINECONE_API_KEY: str
+    PINECONE_INDEX_NAME: str
 
     # MLflow
     MLFLOW_TRACKING_URI: str = "http://localhost:5000"
