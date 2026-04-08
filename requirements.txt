@@ -15,6 +15,20 @@ pytest>=9.0.0
 requests>=2.33.0
 lxml>=6.0.2
 
-# ChromaDB
-chromadb>=0.4.0
+# Pinecone
+pinecone>=3.0.0
+
+# BioBERT embedding model
 sentence-transformers>=2.2.0
+
+# Agent framework
+langchain>=0.2.0
+langchain-openai>=0.1.0
+langchain-community>=0.2.0
+langgraph>=0.1.0
+
+# Redis caching
+redis>=5.0.0
+
+# OpenAI LLM
+openai>=1.0.0

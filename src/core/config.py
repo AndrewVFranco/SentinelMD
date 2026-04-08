@@ -15,9 +15,9 @@ class Settings(BaseSettings):
     OLLAMA_MAX_TOKENS: int = 1024
     OLLAMA_TEMPERATURE: float = 0.1
 
-    # ChromaDB
-    CHROMA_DB_LOCATION: str = str(Path(__file__).resolve().parent.parent.parent / "data" / "chroma_db")
-    CHROMA_COLLECTION_NAME: str = "pubmed_abstracts"
+    # Pinecone
+    PINECONE_API_KEY: str
+    PINECONE_INDEX_NAME: str
 
     # MLflow
     MLFLOW_TRACKING_URI: str = "http://localhost:5000"

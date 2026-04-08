@@ -1,7 +1,9 @@
-import chromadb
+from pinecone import Pinecone
 from sentence_transformers import SentenceTransformer
 from src.core.config import settings
 import os
+from src.retrieval.pubmed import search_pubmed
+import sys
 
 os.environ["HUGGING_FACE_HUB_TOKEN"] = settings.HF_TOKEN
 model = SentenceTransformer("pritamdeka/BioBERT-mnli-snli-scinli-scitail-mednli-stsb")
@@ -16,30 +18,41 @@ def _embed_text(text: str) -> list[float]:
 def get_collection():
     global _collection
     if _collection is None:
-        print(settings.CHROMA_DB_LOCATION)
-        client = chromadb.PersistentClient(path=settings.CHROMA_DB_LOCATION)
-        _collection = client.get_or_create_collection(name=settings.CHROMA_COLLECTION_NAME)
+        pc = Pinecone(api_key=settings.PINECONE_API_KEY)
+        _collection = pc.Index(settings.PINECONE_INDEX_NAME)
     return _collection
 
 
 def add_abstracts(abstracts: list[dict]):
-    ids = []
-    embeddings = []
-    documents = []
-    metadatas = []
+    data_list = []
 
     for item in abstracts:
-        ids.append(item["pmid"])
-        embeddings.append(_embed_text(item["abstract"]))
-        documents.append(item["abstract"])
-        metadatas.append({"pmid": item["pmid"], "title": item["title"]})
+        data = {'id': item["pmid"],
+                'values': _embed_text(item["abstract"]),
+                'metadata': {
+                    "title": item["title"],
+                    "abstract": item["abstract"],
+                    "pmid": item["pmid"]
+                    }
+                }
+        data_list.append(data)
 
-    get_collection().add(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
+    get_collection().upsert(vectors=data_list)
 
 def query_abstracts(query: str, n_results: int = 5) -> list[dict]:
     embedding = _embed_text(query)
     results = get_collection().query(
-        query_embeddings=[embedding],
-        n_results=n_results
+        vector=embedding,
+        top_k=n_results,
+        include_metadata=True
     )
     return results
+
+def main():
+    search_results = search_pubmed("myocardial infarction", max_results=5)
+    add_abstracts(search_results)
+    results = query_abstracts("chest pain treatment")
+    print(results)
+
+if __name__ == "__main__":
+    sys.exit(main())
