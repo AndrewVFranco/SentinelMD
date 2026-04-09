@@ -23,19 +23,19 @@ def get_collection():
 
 def add_abstracts(abstracts: list[dict]):
     data_list = []
-
     for item in abstracts:
-        data = {'id': item["pmid"],
-                'values': _embed_text(item["abstract"]),
-                'metadata': {
+        if item["abstract"] and item["pmid"]:
+            data_list.append({
+                "id": item["pmid"],
+                "values": _embed_text(item["abstract"]),
+                "metadata": {
                     "title": item["title"],
                     "abstract": item["abstract"],
                     "pmid": item["pmid"]
-                    }
                 }
-        data_list.append(data)
-
-    get_collection().upsert(vectors=data_list)
+            })
+    if data_list:
+        get_collection().upsert(vectors=data_list)
 
 def query_abstracts(query: str, n_results: int = 5) -> list[dict]:
     embedding = _embed_text(query)
