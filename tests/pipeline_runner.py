@@ -1,8 +1,8 @@
-from src.agent.graph import app
+from src.agent.graph import agent
 import sys
 
 def main():
-    result = app.invoke({
+    result = agent.invoke({
         "query": "What are the first line treatments for atrial fibrillation?",
         "cache_hit": False,
         "abstracts": [],

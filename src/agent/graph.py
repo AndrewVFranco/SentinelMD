@@ -35,4 +35,4 @@ graph.set_entry_point("preprocess_query")
 graph.set_finish_point("assembly")
 
 # Compile
-app = graph.compile()
+agent = graph.compile()

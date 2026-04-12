@@ -34,3 +34,7 @@ redis>=5.0.0
 # General
 numpy>=2.4.0
 torch>=2.11.0
+
+# FastAPI
+fastapi>=0.110.0
+uvicorn>=0.29.0
