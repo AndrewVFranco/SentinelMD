@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 from src.agent.graph import agent
 from pydantic import BaseModel
