@@ -4,6 +4,7 @@ from src.agent.state import AgentState
 from src.retrieval.cache import get_cache, set_cache
 from src.retrieval.vector_store import add_abstracts, query_abstracts
 from src.retrieval.pubmed import search_pubmed
+from src.monitoring.mlflow_logger import log_query_run
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.output_parsers import JsonOutputParser
 from sentence_transformers import CrossEncoder
@@ -117,6 +118,16 @@ def confidence_scoring(state: AgentState):
     return {"confidence_score": score}
 
 def assembly(state: AgentState):
+    final_response = {
+        "query": state["query"],
+        "response": state["llm_response"],
+        "confidence_score": state["confidence_score"],
+        "scored_claims": state["scored_claims"],
+        "abstracts": state["abstracts"]
+    }
+
+    log_query_run(final_response)
+
     return {"final_response": {
         "query": state["query"],
         "response": state["llm_response"],

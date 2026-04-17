@@ -210,6 +210,7 @@ __marimo__/
 *.DS_Store
 **.DS_Store
 .idea/
+*.db
 
 # Chroma DB
 data/chroma_db/
