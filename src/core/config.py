@@ -10,6 +10,7 @@ class Settings(BaseSettings):
 
     # Gemini
     GEMINI_API_KEY: str
+    GEMINI_MODEL: str
 
     # Pinecone
     PINECONE_API_KEY: str
