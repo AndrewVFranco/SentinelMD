@@ -133,7 +133,7 @@ sentinelmd/
 
 ```bash
 git clone https://github.com/AndrewVFranco/clinical-llm-hallucination-detector.git
-cd clinical-llm-hallucination-detector
+cd SentinelMD
 python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
