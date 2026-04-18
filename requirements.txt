@@ -39,3 +39,7 @@ torch>=2.11.0
 # FastAPI
 fastapi>=0.110.0
 uvicorn>=0.29.0
+
+# RAGAS
+ragas>=0.1.0
+datasets>=2.0.0
