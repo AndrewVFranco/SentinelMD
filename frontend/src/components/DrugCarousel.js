@@ -1,21 +1,30 @@
 import React, { useState } from 'react';
 
+const SECTION_ORDER = [
+  'indications_and_usage',
+  'dosage_and_administration',
+  'warnings',
+  'contraindications',
+  'adverse_reactions',
+  'drug_interactions',
+];
+
 const SECTION_LABELS = {
+  indications_and_usage: 'Indications & Usage',
+  dosage_and_administration: 'Dosage & Administration',
   warnings: 'Warnings',
   contraindications: 'Contraindications',
   adverse_reactions: 'Adverse Reactions',
   drug_interactions: 'Drug Interactions',
-  dosage_and_administration: 'Dosage & Administration',
-  indications_and_usage: 'Indications & Usage',
 };
 
 const SECTION_ACCENT = {
-  warnings: '#dc2626',
-  contraindications: '#d97706',
-  adverse_reactions: '#ca8a04',
-  drug_interactions: '#2563eb',
+  indications_and_usage: '#2563eb',
   dosage_and_administration: '#16a34a',
-  indications_and_usage: '#7c3aed',
+  warnings: '#d97706',
+  contraindications: '#dc2626',
+  adverse_reactions: '#b45309',
+  drug_interactions: '#7c3aed',
 };
 
 function getSectionKey(pmid) {
@@ -29,8 +38,16 @@ function getDrugName(pmid) {
 }
 
 function DrugCard({ drug, sections }) {
+  const sorted = [...sections].sort((a, b) => {
+    const aKey = getSectionKey(a.pmid);
+    const bKey = getSectionKey(b.pmid);
+    const aIdx = SECTION_ORDER.indexOf(aKey);
+    const bIdx = SECTION_ORDER.indexOf(bKey);
+    return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
+  });
+
   const [activeSection, setActiveSection] = useState(0);
-  const current = sections[activeSection];
+  const current = sorted[activeSection];
   const sectionKey = getSectionKey(current.pmid);
   const accent = SECTION_ACCENT[sectionKey] || 'var(--text-3)';
 
@@ -71,7 +88,7 @@ function DrugCard({ drug, sections }) {
         borderBottom: '1px solid var(--border)',
         scrollbarWidth: 'none',
       }}>
-        {sections.map((s, i) => {
+        {sorted.map((s, i) => {
           const key = getSectionKey(s.pmid);
           const a = SECTION_ACCENT[key] || 'var(--text-3)';
           const isActive = i === activeSection;

@@ -1,11 +1,13 @@
-from langgraph.graph import StateGraph
+from langgraph.graph import StateGraph, START
 from src.agent.nodes import pubmed_retrieval, llm_generation, parse_claims, nli_scoring, \
-    confidence_scoring, assembly, preprocess_query, detect_medications, fda_enrichment, route_after_medication_detection
+    confidence_scoring, assembly, preprocess_query, detect_medications, fda_enrichment, \
+    route_after_medication_detection, fhir_input, route_entry
 from src.agent.state import AgentState
 
 graph = StateGraph(AgentState)
 
 # Add nodes
+graph.add_node("fhir_input", fhir_input)
 graph.add_node("preprocess_query", preprocess_query)
 graph.add_node("pubmed_retrieval", pubmed_retrieval)
 graph.add_node("llm_generation", llm_generation)
@@ -24,6 +26,7 @@ graph.add_conditional_edges(
 )
 
 # Add edges
+graph.add_edge("fhir_input", "preprocess_query")
 graph.add_edge("preprocess_query", "pubmed_retrieval")
 graph.add_edge("pubmed_retrieval", "detect_medications")
 graph.add_edge("fda_enrichment", "llm_generation")
@@ -33,7 +36,12 @@ graph.add_edge("nli_scoring", "confidence_scoring")
 graph.add_edge("confidence_scoring", "assembly")
 
 # Set entry and finish
-graph.set_entry_point("preprocess_query")
+graph.add_conditional_edges(
+    START,
+    route_entry,
+    {"fhir_input": "fhir_input", "preprocess_query": "preprocess_query"}
+)
+
 graph.set_finish_point("assembly")
 
 # Compile

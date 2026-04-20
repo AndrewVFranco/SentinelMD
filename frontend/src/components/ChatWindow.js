@@ -1,10 +1,15 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import ClaimItem from './ClaimItem';
 import DrugCarousel from './DrugCarousel';
 
+const FHIR_RESOURCE_TYPES = ['Condition', 'MedicationRequest', 'DiagnosticReport'];
+
 function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
   const bottomRef = useRef(null);
+  const [showFhir, setShowFhir] = useState(false);
+  const [fhirType, setFhirType] = useState('Condition');
+  const [fhirId, setFhirId] = useState('');
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -13,9 +18,24 @@ function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      onSubmit();
+      handleSubmit();
     }
   };
+
+  const handleSubmit = () => {
+    const fhirData = showFhir && fhirId.trim() ? {
+      has_fhir: true,
+      fhir_resource_type: fhirType,
+      fhir_resource_id: fhirId.trim(),
+    } : {
+      has_fhir: false,
+      fhir_resource_type: null,
+      fhir_resource_id: null,
+    };
+    onSubmit(fhirData);
+  };
+
+  const canSubmit = query.trim() || (showFhir && fhirId.trim());
 
   return (
     <main className="chat-window">
@@ -24,8 +44,9 @@ function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
           <div className="empty-state">
             <h2>Ask a clinical question</h2>
             <p>
-              The system will retrieve relevant PubMed abstracts and verify each
-              claim in the response against medical literature using NLI scoring.
+              The system retrieves PubMed abstracts and verifies each claim
+              against medical literature using NLI scoring. Optionally attach
+              a FHIR resource for structured clinical context.
             </p>
           </div>
         )}
@@ -83,10 +104,83 @@ function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
       </div>
 
       <div className="input-area">
+        {showFhir && (
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <span style={{ fontFamily: 'DM Mono, monospace', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-3)' }}>
+                FHIR Resource
+              </span>
+              <span style={{ fontFamily: 'DM Mono, monospace', fontSize: 10, color: 'var(--text-3)' }}>
+                · HAPI R4 Server
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <select
+                value={fhirType}
+                onChange={(e) => setFhirType(e.target.value)}
+                style={{
+                  background: 'var(--bg)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 6,
+                  color: 'var(--text)',
+                  fontFamily: 'DM Mono, monospace',
+                  fontSize: 12,
+                  padding: '6px 10px',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+              >
+                {FHIR_RESOURCE_TYPES.map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+              <input
+                type="text"
+                placeholder="Resource ID (e.g. 123456)"
+                value={fhirId}
+                onChange={(e) => setFhirId(e.target.value)}
+                style={{
+                  flex: 1,
+                  background: 'var(--bg)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 6,
+                  color: 'var(--text)',
+                  fontFamily: 'DM Mono, monospace',
+                  fontSize: 12,
+                  padding: '6px 10px',
+                  outline: 'none',
+                }}
+              />
+            </div>
+          </div>
+        )}
+
         <div className="input-row">
+          <button
+            onClick={() => setShowFhir(!showFhir)}
+            title="Attach FHIR resource"
+            style={{
+              background: showFhir ? 'var(--text)' : 'transparent',
+              color: showFhir ? 'var(--bg)' : 'var(--text-3)',
+              border: '1px solid var(--border)',
+              borderRadius: 6,
+              width: 32,
+              height: 32,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              flexShrink: 0,
+              fontSize: 13,
+              transition: 'all 0.15s',
+            }}
+          >
+            ⬡
+          </button>
           <textarea
             className="chat-textarea"
-            placeholder="Ask a clinical question…"
+            placeholder={showFhir ? 'Optional: add a specific question about this resource…' : 'Ask a clinical question…'}
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -94,12 +188,13 @@ function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
           />
           <button
             className="send-btn"
-            onClick={onSubmit}
-            disabled={loading || !query.trim()}
+            onClick={handleSubmit}
+            disabled={loading || !canSubmit}
           >
             ↑
           </button>
         </div>
+        <div className="input-hint">Enter to send · Shift+Enter for new line</div>
       </div>
     </main>
   );

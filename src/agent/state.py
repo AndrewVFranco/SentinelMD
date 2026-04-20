@@ -1,6 +1,10 @@
 from typing import TypedDict, Optional
 
 class AgentState(TypedDict):
+    has_fhir: bool
+    fhir_resource_type: Optional[str]
+    fhir_resource_id: Optional[str]
+    fhir_output: Optional[str]
     query: str
     has_drug_query: bool
     drug_names: Optional[list[str]]

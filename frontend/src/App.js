@@ -27,10 +27,13 @@ function App() {
     });
   };
 
-  const handleSubmit = async () => {
-    if (!query.trim() || loading) return;
+  const handleSubmit = async (fhirData = {}) => {
+    if ((!query.trim() && !fhirData.has_fhir) || loading) return;
 
-    const userMessage = { role: 'user', text: query };
+    const userMessage = {
+        role: 'user',
+        text: query || `FHIR ${fhirData.fhir_resource_type}/${fhirData.fhir_resource_id}`
+      };
     setMessages(prev => [...prev, userMessage]);
     setQuery('');
     setLoading(true);
@@ -40,7 +43,7 @@ function App() {
       const response = await fetch('http://localhost:8000/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: userMessage.text, api_key: apiKey }),
+        body: JSON.stringify({ query: userMessage.text, api_key: apiKey, ...fhirData }),
       });
 
       if (!response.ok) throw new Error('Query failed');
