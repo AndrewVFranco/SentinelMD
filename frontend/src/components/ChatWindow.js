@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import ClaimItem from './ClaimItem';
+import DrugCarousel from './DrugCarousel';
 
 function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
   const bottomRef = useRef(null);
@@ -52,6 +53,7 @@ function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
                 <div className="assistant-response">
                   <ReactMarkdown>{msg.data.response}</ReactMarkdown>
                 </div>
+                <DrugCarousel abstracts={msg.data.abstracts} />
                 {msg.data.scored_claims && msg.data.scored_claims.length > 0 && (
                   <div className="claims-section">
                     <div className="claims-heading">Claim Verification</div>
