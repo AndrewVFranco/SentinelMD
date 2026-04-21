@@ -27,11 +27,16 @@
   --radius-sm: 4px;
 }
 
-html, body { height: 100%; overflow: hidden; }
+/* 1. Stop the browser from bouncing or scrolling the background */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
 
 body {
   font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
   color: var(--text);
   font-size: 14px;
   line-height: 1.5;
@@ -65,9 +70,22 @@ body .message-user .bubble {
   color: var(--text);
 }
 
-/* HEADER */
+/* 2. THE APP WRAPPER: Pinned to the screen edges completely */
+.app {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh; /* Fallback for older browsers */
+  height: 100dvh; /* Modern fix for mobile address bars */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 3. THE HEADER: Fixed height, sits at the top */
 header.header {
-  position: fixed; top: 0; left: 0; right: 0;
+  flex-shrink: 0;
   height: var(--header);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -85,43 +103,26 @@ header.header {
 
 .logo span { font-style: italic; color: var(--text-2); }
 
-.status {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 12px; font-family: 'DM Mono', monospace;
-  color: var(--text-2);
-}
-
-.status-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #9c9890;
-  transition: background 0.3s;
-}
-
-.status-dot.ready { background: #22c55e; }
-.status-dot.loading { background: #f59e0b; animation: pulse 1s infinite; }
-
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-/* LAYOUT */
+/* 4. THE MAIN LAYOUT: Takes up exactly the remaining vertical space */
 .layout {
   display: flex;
-  height: 100vh;
-  padding-top: var(--header); /* Pushes content down below fixed header */
+  flex: 1;
+  position: relative; /* Crucial anchor for the mobile sidebar */
   overflow: hidden;
 }
 
-/* SIDEBAR CONTAINER (Desktop default) */
+/* 5. THE SIDEBAR (Desktop): Sits normally in the flex row */
 .sidebar-container {
   width: var(--sidebar);
   flex-shrink: 0;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
   background: var(--surface);
   border-right: 1px solid var(--border);
   z-index: 50;
-  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* SIDEBAR */
 aside.sidebar {
   width: 100%;
   display: flex;
@@ -224,7 +225,7 @@ aside.sidebar {
   font-weight: 400;
 }
 
-/* CHAT WINDOW */
+/* 6. THE CHAT WINDOW: Takes up the rest of the flex row */
 .chat-window {
   flex: 1;
   display: flex;
@@ -496,7 +497,6 @@ aside.sidebar {
   border: none;
   background: transparent;
   font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
   color: var(--text);
   outline: none;
   resize: none;
@@ -533,83 +533,62 @@ aside.sidebar {
 
 /* --- MOBILE RESPONSIVE RULES --- */
 
-/* Hide the hamburger menu and overlay on desktop */
-.mobile-menu-toggle {
-  display: none;
-}
-
-.mobile-overlay {
-  display: none;
-}
+.mobile-menu-toggle { display: none; }
+.mobile-overlay { display: none; }
 
 @media (max-width: 768px) {
-  header.header {
-    padding: 0 16px;
+  header.header { padding: 0 16px; }
+  .mobile-menu-toggle { display: block; }
+
+  /* Remove the keyboard shortcut hint to save space */
+  .input-hint { display: none; }
+  .messages { padding: 16px; }
+  .input-area { padding: 12px 16px; }
+  .message-user .bubble { max-width: 90%; }
+
+  /* 7. SCORCHED-EARTH ANTI-ZOOM FOR iOS/ANDROID */
+  /* Forces all inputs to 16px, making mobile browsers skip auto-zoom */
+  input,
+  textarea,
+  select,
+  .chat-textarea,
+  .api-input,
+  input[type="text"],
+  input[type="password"] {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+  }
+  button, .send-btn, .mobile-menu-toggle {
+    touch-action: manipulation !important;
   }
 
-  /* Show hamburger menu */
-  .mobile-menu-toggle {
-    display: block;
-  }
-
-  .layout {
-    flex-direction: column;
-  }
-
-  /* Bulletproof fixed positioning for mobile drawer */
+  /* 8. MOBILE DRAWER: Transforms from flex item into an absolute overlay */
   .sidebar-container {
-    position: fixed;
-    top: var(--header);
+    position: absolute;
+    top: 0;
     bottom: 0;
-    height: calc(100vh - var(--header)); /* Ensures it exactly fills the remaining space */
-    left: -100%; /* Hidden off-screen */
-    z-index: 90; /* Just below the header */
+    left: 0;
+    height: 100%;
+    z-index: 90;
+    transform: translateX(-100%); /* Slides entirely off screen */
+    box-shadow: none;
+  }
+
+  .sidebar-container.open {
+    transform: translateX(0); /* Slides perfectly into view */
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
   }
 
-  /* Slide in when 'open' */
-  .sidebar-container.open {
-    left: 0;
-  }
-
-  /* Stronger shadow in dark mode */
   body.dark-mode .sidebar-container.open {
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.6);
   }
 
-  /* Chat window fills screen */
-  .chat-window {
-    width: 100%;
-  }
-
-  /* Show the darkening overlay */
   .mobile-overlay {
     display: block;
-    position: fixed;
-    top: var(--header);
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.4);
-    z-index: 80; /* Just below the sidebar */
+    z-index: 80;
     backdrop-filter: blur(2px);
-  }
-
-  /* Adjust message padding and widths */
-  .messages {
-    padding: 16px;
-  }
-
-  .message-user .bubble {
-    max-width: 90%; /* Let bubbles be wider on small screens */
-  }
-
-  .input-area {
-    padding: 12px 16px;
-  }
-
-  /* Hide the "Enter to send" hint on mobile */
-  .input-hint {
-    display: none;
   }
 }
