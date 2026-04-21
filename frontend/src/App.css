@@ -110,12 +110,20 @@ header.header {
   overflow: hidden;
 }
 
-/* SIDEBAR */
-aside.sidebar {
+/* SIDEBAR CONTAINER (New wrapper for mobile logic) */
+.sidebar-container {
   width: var(--sidebar);
   flex-shrink: 0;
+  height: 100%;
   background: var(--surface);
   border-right: 1px solid var(--border);
+  z-index: 50;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* SIDEBAR */
+aside.sidebar {
+  width: 100%;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -521,4 +529,96 @@ aside.sidebar {
   margin-top: 6px;
   text-align: right;
   font-family: 'DM Mono', monospace;
+}
+
+/* --- MOBILE RESPONSIVE RULES --- */
+
+/* Hide the hamburger menu and overlay on desktop */
+.mobile-menu-toggle {
+  display: none;
+}
+
+.mobile-overlay {
+    display: block;
+    position: absolute;
+    top: var(--header); /* Start below the fixed header */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 40;
+    backdrop-filter: blur(2px);
+  }
+
+@media (max-width: 768px) {
+  header.header {
+    padding: 0 16px;
+  }
+
+  /* Show hamburger menu */
+  .mobile-menu-toggle {
+    display: block;
+  }
+
+  /* Make layout relative for absolute positioning of sidebar */
+  .layout {
+    position: relative;
+    flex-direction: column;
+  }
+
+  /* Turn Sidebar into a slide-out drawer */
+  .sidebar-container {
+    position: absolute;
+    top: var(--header); /* Start below the fixed header */
+    bottom: 0;          /* Stretch to the bottom */
+    height: auto;       /* Override the desktop 100% height */
+    left: -100%;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Slide in when 'open' */
+  .sidebar-container.open {
+    left: 0;
+  }
+
+  /* Stronger shadow in dark mode */
+  body.dark-mode .sidebar-container.open {
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Chat window fills screen */
+  .chat-window {
+    width: 100%;
+  }
+
+  /* Show the darkening overlay */
+  .mobile-overlay {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 40;
+    backdrop-filter: blur(2px);
+  }
+
+  /* Adjust message padding and widths */
+  .messages {
+    padding: 16px;
+  }
+
+  .message-user .bubble {
+    max-width: 90%; /* Let bubbles be wider on small screens */
+  }
+
+  .input-area {
+    padding: 12px 16px;
+  }
+
+  /* Hide the "Enter to send" hint on mobile */
+  .input-hint {
+    display: none;
+  }
 }

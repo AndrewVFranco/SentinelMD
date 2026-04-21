@@ -1,5 +1,5 @@
-import React, {useLayoutEffect, useState} from 'react';
-import { Sun, Moon } from 'lucide-react';
+import React, { useLayoutEffect, useState } from 'react';
+import { Sun, Moon, Menu, X } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
 import './App.css';
@@ -12,6 +12,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('theme');
     return saved ? saved === 'dark' : true;
@@ -29,8 +30,13 @@ function App() {
     });
   };
 
+  const closeSidebar = () => setIsSidebarOpen(false);
+
   const handleSubmit = async (fhirData = {}) => {
     if ((!query.trim() && !fhirData.has_fhir) || loading) return;
+
+    // Close the sidebar automatically on mobile when a query is sent
+    closeSidebar();
 
     const userMessage = {
         role: 'user',
@@ -78,22 +84,39 @@ function App() {
   return (
     <div className="app">
       <header className="header">
-        <div className="logo">
-          Sentinel<span>MD</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            className="mobile-menu-toggle"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}
+          >
+            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+
+          <div className="logo">
+            Sentinel<span>MD</span>
+          </div>
         </div>
 
         <div>
-          <button onClick={toggleTheme} style={{ background: 'none', border: 'none', outline: 'none', color: 'inherit' }}>
-            {darkMode ? <Sun /> : <Moon />}
+          <button onClick={toggleTheme} style={{ background: 'none', border: 'none', outline: 'none', color: 'inherit', cursor: 'pointer' }}>
+            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
         </div>
       </header>
 
       <div className="layout">
-        <Sidebar apiKey={apiKey} onApiKeyChange={setApiKey} result={result}/>
+        <div className={`sidebar-container ${isSidebarOpen ? 'open' : ''}`}>
+          <Sidebar apiKey={apiKey} onApiKeyChange={setApiKey} result={result}/>
+        </div>
+
+        {isSidebarOpen && (
+           <div className="mobile-overlay" onClick={closeSidebar}></div>
+        )}
+
         <ChatWindow
-            messages={messages}
-            query={query}
+          messages={messages}
+          query={query}
           onQueryChange={setQuery}
           onSubmit={handleSubmit}
           loading={loading}

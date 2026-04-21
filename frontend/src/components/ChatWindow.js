@@ -22,14 +22,14 @@ function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
   // Track which placeholder is currently active
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
-  // Swap the placeholder every 3.5 seconds
+  // Swap the placeholder every 5 seconds
   useEffect(() => {
     // Stop the carousel if a message has already been sent
     if (messages.length > 0) return;
 
     const timer = setInterval(() => {
       setPlaceholderIndex((prev) => (prev + 1) % SAMPLE_PLACEHOLDERS.length);
-    }, 5000); // 5 seconds
+    }, 5000);
 
     return () => clearInterval(timer);
   }, [messages.length]);
@@ -159,7 +159,9 @@ function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
                 · HAPI R4 Server
               </span>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
+
+            {/* Added flexWrap: 'wrap' here so the inputs stack cleanly on small mobile screens */}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <select
                 value={fhirType}
                 onChange={(e) => setFhirType(e.target.value)}
@@ -173,7 +175,8 @@ function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
                   padding: '6px 10px',
                   outline: 'none',
                   cursor: 'pointer',
-                  flexShrink: 0,
+                  flex: '1 1 auto', /* Allows the select to shrink/grow gracefully */
+                  minWidth: '140px', /* Ensures it doesn't get too small before wrapping */
                 }}
               >
                 {FHIR_RESOURCE_TYPES.map(t => (
@@ -186,7 +189,8 @@ function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
                 value={fhirId}
                 onChange={(e) => setFhirId(e.target.value)}
                 style={{
-                  flex: 1,
+                  flex: '2 1 auto', /* Allows input to take up remaining space */
+                  minWidth: '150px',
                   background: 'var(--bg)',
                   border: '1px solid var(--border)',
                   borderRadius: 6,
