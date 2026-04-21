@@ -21,7 +21,7 @@ def get_collection():
     return _collection
 
 
-def add_abstracts(abstracts: list[dict]):
+def add_abstracts(abstracts: list[dict], namespace: str = ""):
     data_list = []
     for item in abstracts:
         if item["abstract"] and item["pmid"]:
@@ -35,13 +35,14 @@ def add_abstracts(abstracts: list[dict]):
                 }
             })
     if data_list:
-        get_collection().upsert(vectors=data_list)
+        get_collection().upsert(vectors=data_list, namespace=namespace)
 
-def query_abstracts(query: str, n_results: int = 3) -> list[dict]:
+def query_abstracts(query: str, namespace: str = "", n_results: int = 3) -> list[dict]:
     embedding = _embed_text(query)
     results = get_collection().query(
         vector=embedding,
         top_k=n_results,
-        include_metadata=True
+        include_metadata=True,
+        namespace=namespace
     )
     return [match["metadata"] for match in results["matches"]]

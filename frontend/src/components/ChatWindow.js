@@ -5,15 +5,46 @@ import DrugCarousel from './DrugCarousel';
 
 const FHIR_RESOURCE_TYPES = ['Condition', 'MedicationRequest', 'DiagnosticReport'];
 
+const SAMPLE_PLACEHOLDERS = [
+  'e.g. What are the evidence-based treatments for heart failure?',
+  'e.g. Are there any contraindications for prescribing Tylenol?',
+  'e.g. Summarize the latest clinical guidelines for managing Type 2 Diabetes.',
+  'e.g. What is the NNT for statins in primary prevention?'
+];
+
 function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
   const bottomRef = useRef(null);
+  const textareaRef = useRef(null);
   const [showFhir, setShowFhir] = useState(false);
   const [fhirType, setFhirType] = useState('Condition');
   const [fhirId, setFhirId] = useState('');
 
+  // Track which placeholder is currently active
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+
+  // Swap the placeholder every 3.5 seconds
+  useEffect(() => {
+    // Stop the carousel if a message has already been sent
+    if (messages.length > 0) return;
+
+    const timer = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % SAMPLE_PLACEHOLDERS.length);
+    }, 5000); // 5 seconds
+
+    return () => clearInterval(timer);
+  }, [messages.length]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
+
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (ta) {
+      ta.style.height = 'auto';
+      ta.style.height = `${Math.min(ta.scrollHeight, 120)}px`;
+    }
+  }, [query]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -33,9 +64,19 @@ function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
       fhir_resource_id: null,
     };
     onSubmit(fhirData);
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
   };
 
   const canSubmit = query.trim() || (showFhir && fhirId.trim());
+
+  // Determine what the current placeholder should be
+  const currentPlaceholder = showFhir
+    ? 'Optional: add a specific question about this resource…'
+    : messages.length > 0
+      ? 'Ask another question...'
+      : SAMPLE_PLACEHOLDERS[placeholderIndex];
 
   return (
     <main className="chat-window">
@@ -44,7 +85,7 @@ function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
           <div className="empty-state">
             <h2>Ask a clinical question</h2>
             <p>
-              The system retrieves PubMed abstracts and verifies each claim
+              The system retrieves openFDA and PubMed abstracts and verifies each claim
               against medical literature using NLI scoring. Optionally attach
               a FHIR resource for structured clinical context.
             </p>
@@ -63,12 +104,16 @@ function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
           if (msg.role === 'error') {
             return (
               <div key={i} className="message-error">
-                <div className="bubble">{msg.text}</div>
+                <div className="bubble">
+                  <span style={{ flexShrink: 0 }}>⚠</span>
+                  {msg.text}
+                </div>
               </div>
             );
           }
 
           if (msg.role === 'assistant') {
+            if (!msg.data) return null;
             return (
               <div key={i} className="message-assistant">
                 <div className="assistant-response">
@@ -179,12 +224,14 @@ function ChatWindow({ messages, query, onQueryChange, onSubmit, loading }) {
             ⬡
           </button>
           <textarea
+            ref={textareaRef}
             className="chat-textarea"
-            placeholder={showFhir ? 'Optional: add a specific question about this resource…' : 'Ask a clinical question…'}
+            placeholder={currentPlaceholder}
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             onKeyDown={handleKeyDown}
             rows={1}
+            style={{ overflow: 'hidden' }}
           />
           <button
             className="send-btn"

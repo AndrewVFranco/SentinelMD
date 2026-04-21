@@ -4,6 +4,8 @@ import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
 import './App.css';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 function App() {
   const [query, setQuery] = useState('');
   const [apiKey, setApiKey] = useState('');
@@ -40,7 +42,7 @@ function App() {
     setResult(null);
 
     try {
-      const response = await fetch('http://localhost:8000/query', {
+      const response = await fetch(`${API_URL}/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: userMessage.text, api_key: apiKey, ...fhirData }),
@@ -48,14 +50,26 @@ function App() {
 
       if (!response.ok) throw new Error('Query failed');
       const data = await response.json();
+      console.log('full response:', data);
+      console.log('final_response:', data.final_response);
       const final = data.final_response;
       setResult(final);
       setMessages(prev => [...prev, { role: 'assistant', data: final }]);
     } catch (err) {
-      setMessages(prev => [...prev, {
-        role: 'error',
-        text: 'Failed to connect to the analysis server. Ensure the backend is running.'
-      }]);
+        let errorText = 'Failed to connect to the analysis server. Ensure the backend is running.';
+
+        if (err.message === 'Query failed') {
+          errorText = 'The server returned an error. Check your API key or try a different query.';
+        } else if (err.message.includes('fetch')) {
+          errorText = 'Cannot reach the backend server. Ensure it is running on port 8000.';
+        } else if (err.message.includes('quota') || err.message.includes('429')) {
+          errorText = 'API quota exhausted. Please provide your own Gemini API key.';
+        }
+
+        setMessages(prev => [...prev, {
+          role: 'error',
+          text: errorText
+        }]);
     } finally {
       setLoading(false);
     }

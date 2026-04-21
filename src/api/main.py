@@ -19,7 +19,12 @@ app = FastAPI(lifespan=lifespan, title="SentinelMD")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "127.0.0.1:3000"
+        "https://andrewvfranco-sentinelmd.hf.space",
+        "https://*.hf.space",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,6 +34,7 @@ app.add_middleware(
 async def query(request: QueryRequest):
     try:
         result = agent.invoke({
+            "api_key": request.api_key,
             "query": request.query,
             "search_query": None,
             "abstracts": [],
@@ -37,6 +43,7 @@ async def query(request: QueryRequest):
             "scored_claims": None,
             "confidence_score": None,
             "final_response": None,
+            "has_drug_query": False,
             "drug_names": None,
             "drug_labels": None,
             "has_fhir": request.has_fhir,
@@ -54,6 +61,7 @@ async def query(request: QueryRequest):
 async def fhir(request: QueryRequest):
     try:
         result = agent.invoke({
+            "api_key": request.api_key,
             "query": request.query,
             "search_query": None,
             "abstracts": [],
@@ -62,6 +70,7 @@ async def fhir(request: QueryRequest):
             "scored_claims": None,
             "confidence_score": None,
             "final_response": None,
+            "has_drug_query": False,
             "drug_names": None,
             "drug_labels": None,
             "has_fhir": True,

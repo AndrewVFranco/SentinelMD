@@ -20,7 +20,7 @@ def parse_data(xml_text: str) -> list[dict]:
     return article_list
 
 
-def search_pubmed(query: str, max_results: int = 10) -> list[dict]:
+def search_pubmed(query: str, max_results: int = 15) -> list[dict]:
     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
     article_list = []
 

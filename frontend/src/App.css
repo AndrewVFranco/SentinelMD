@@ -425,12 +425,15 @@ aside.sidebar {
 
 /* ERROR */
 .message-error .bubble {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--contradicted-bg);
+  border: 1px solid var(--contradicted-border);
   color: var(--contradicted);
   padding: 10px 14px;
   border-radius: 8px;
   font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 /* LOADING */
