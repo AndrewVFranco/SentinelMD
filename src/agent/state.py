@@ -1,6 +1,7 @@
 from typing import TypedDict, Optional
 
 class AgentState(TypedDict):
+    api_key: Optional[str]
     has_fhir: bool
     fhir_resource_type: Optional[str]
     fhir_resource_id: Optional[str]
